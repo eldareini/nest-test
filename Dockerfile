@@ -1,9 +1,28 @@
-FROM node:12.19.0-alpine3.9 
+FROM node:12.19.0-alpine3.9 As development
 
-WORKDIR /app
-ADD package.json /app/package.json
-RUN npm config set registry http://registry.npmjs.org
-RUN npm install
-ADD . /app
-EXPOSE 3000
-CMD ["npm", "run", "start"]
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install --only=development
+
+COPY . .
+
+RUN npm run build
+
+FROM node:12.19.0-alpine3.9 As production
+
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY . .
+
+COPY --from=development /usr/src/app/dist ./dist
+
+CMD ["node", "dist/main"]
