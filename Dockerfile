@@ -1,4 +1,4 @@
-FROM ubi8/nodejs-12 
+FROM node:12.19.0-alpine3.9 
 
 WORKDIR /app
 ADD package.json /app/package.json
